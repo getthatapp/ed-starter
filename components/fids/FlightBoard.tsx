@@ -5,6 +5,7 @@ import { FlightRow } from './FlightRow';
 import { LiveClock } from './LiveClock';
 import { useShallow } from 'zustand/react/shallow';
 import { useFlightsStore, selectFilteredFlights } from '@/store/flightsStore';
+import type { SortField } from '@/store/flightsStore';
 import type { Flight, FlightStatus, Terminal } from '@/types';
 import { ALL_AIRLINES, ALL_STATUSES, ALL_TERMINALS } from '@/types';
 
@@ -13,8 +14,13 @@ interface FlightBoardProps {
 }
 
 export function FlightBoard({ initialFlights }: FlightBoardProps) {
-  const { filters, setFilter, setFlights } = useFlightsStore();
+  const { filters, setFilter, setFlights, sort, setSort } = useFlightsStore();
   const flights = useFlightsStore(useShallow(selectFilteredFlights));
+
+  function sortIcon(field: SortField) {
+    if (sort?.field !== field) return '⇅';
+    return sort.dir === 'asc' ? '▲' : '▼';
+  }
 
   useEffect(() => {
     setFlights(initialFlights);
@@ -96,10 +102,25 @@ export function FlightBoard({ initialFlights }: FlightBoardProps) {
         <span>Flight</span>
         <span>Airline</span>
         <span>Destination</span>
-        <span className="text-center">Time</span>
-        <span className="text-center">Term.</span>
+        <button
+          onClick={() => setSort('departureTime')}
+          className={`flex items-center justify-center gap-1 cursor-pointer transition-colors hover:text-amber-400 ${sort?.field === 'departureTime' ? 'text-amber-400' : ''}`}
+        >
+          Time <span className="opacity-60">{sortIcon('departureTime')}</span>
+        </button>
+        <button
+          onClick={() => setSort('terminal')}
+          className={`flex items-center justify-center gap-1 cursor-pointer transition-colors hover:text-amber-400 ${sort?.field === 'terminal' ? 'text-amber-400' : ''}`}
+        >
+          Term. <span className="opacity-60">{sortIcon('terminal')}</span>
+        </button>
         <span className="text-center">Gate</span>
-        <span>Status</span>
+        <button
+          onClick={() => setSort('status')}
+          className={`flex items-center gap-1 cursor-pointer transition-colors hover:text-amber-400 ${sort?.field === 'status' ? 'text-amber-400' : ''}`}
+        >
+          Status <span className="opacity-60">{sortIcon('status')}</span>
+        </button>
       </div>
 
       {/* Flights */}
